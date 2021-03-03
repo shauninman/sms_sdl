@@ -24,6 +24,7 @@ void Sound_Init()
 #else
 	uint32_t format = AFMT_S16_BE;
 #endif
+	int32_t fragment = 0x7fff000b;	// 2048 bytes
 	int32_t err_ret;
 	int32_t tmp;
 	
@@ -40,6 +41,12 @@ void Sound_Init()
 		return;
 	}
 	
+	err_ret = ioctl(oss_audio_fd, SNDCTL_DSP_SETFRAGMENT, &fragment);
+	if (err_ret == -1)
+	{
+		printf("Could not set fragment\n");
+		return;
+	}
 	err_ret = ioctl(oss_audio_fd, SNDCTL_DSP_SPEED,&tmp);
 	if (err_ret == -1)
 	{

@@ -21,6 +21,8 @@ void Sound_Init(void)
 	snd_pcm_uframes_t frames;
 	
 	/* Open PCM device for playback. */
+	int32_t rc = snd_pcm_open(&handle, "hw:0,0", SND_PCM_STREAM_PLAYBACK, 0);	// For TRIMUI
+/*											//
 	int32_t rc = snd_pcm_open(&handle, "default", SND_PCM_STREAM_PLAYBACK, 0);
 
 #ifdef ZIPIT_PORT
@@ -39,7 +41,7 @@ void Sound_Init(void)
 
 	if (rc < 0)
 		rc = snd_pcm_open(&handle, "plughw:1,0", SND_PCM_STREAM_PLAYBACK, 0);
-
+*/
 	if (rc < 0)
 	{
 		fprintf(stderr, "unable to open PCM device: %s\n", snd_strerror(rc));
@@ -108,7 +110,7 @@ void Sound_Init(void)
 	rc = snd_pcm_hw_params_set_period_size_near(handle, params, &frames, &dir);
 	if (rc < 0)
 	{
-		fprintf(stderr, "Error:snd_pcm_hw_params_set_buffer_size_near %s\n", snd_strerror(rc));
+		fprintf(stderr, "Error:snd_pcm_hw_params_set_period_size_near %s\n", snd_strerror(rc));
 		return;
 	}
 	frames *= 4;
@@ -134,6 +136,7 @@ void Sound_Update(int16_t* sound_buffer, unsigned long len)
 {
 	long ret;
 	ret = snd_pcm_writei(handle, sound_buffer, len);
+
 	while(ret != len) 
 	{
 		if (ret < 0) snd_pcm_prepare( handle );

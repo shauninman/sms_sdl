@@ -11,7 +11,7 @@ static SDL_mutex *sound_mutex;
 static SDL_cond *sound_cv;
 
 /* Using Mutexes by default but allowing disabling them on compilation */
-//#define SDLAUDIO_MUTEX
+#define SDLAUDIO_MUTEX
 
 static int32_t BUFFSIZE;
 static uint8_t *buffer;
@@ -23,7 +23,7 @@ static int32_t buffered_bytes = 0;
 static int32_t sdl_write_buffer_m(uint8_t* data, unsigned long len)
 {
 	SDL_LockMutex(sound_mutex);
-	for(uint8_t i = 0; i < len; i += 4) 
+	for(uint32_t i = 0; i < len; i += 4) 
 	{
 		while(buffered_bytes == BUFFSIZE) SDL_CondWait(sound_cv, sound_mutex);
 
@@ -49,7 +49,6 @@ static void sdl_write_buffer(uint8_t* data, int32_t len)
 	}
 }
 
-
 static int32_t sdl_read_buffer(uint8_t* data, int32_t len)
 {
 	if (buffered_bytes >= len) 
@@ -66,7 +65,7 @@ static int32_t sdl_read_buffer(uint8_t* data, int32_t len)
 		}
 		buf_read_pos = (buf_read_pos + len) % BUFFSIZE;
 		buffered_bytes -= len;
-	}
+	} //else { puts("Underrun Occured"); }
 
 	return len;
 }
@@ -101,7 +100,8 @@ void Sound_Init()
 	aspec.format   = AUDIO_S16SYS;
 	aspec.freq     = SOUND_FREQUENCY;
 	aspec.channels = 2;
-	aspec.samples  = snd.buffer_size;
+	aspec.samples  = snd.buffer_size /4;
+//	aspec.samples  = 512;
 	#ifdef SDLAUDIO_MUTEX
 	aspec.callback = sdl_callback_m;
 	#else
