@@ -249,6 +249,72 @@ void bitmap_scale(uint32_t startx, uint32_t starty, uint32_t viswidth, uint32_t 
     } while (--H);
 }
 
+// 160x144 to 240x216 (40,12)
+void upscale_160x144_to_240x216(uint32_t *dst, uint32_t *src) {
+	// NOTE: this works because every column or row is adjacent to an interpolated 
+	// one meaning that all strokes end up being the same thickness
+	
+    uint16_t *src_px = (uint16_t*) src; // 160x144 (is what we care about, the buffer is actuall 256x192)
+    uint16_t *dst_px = (uint16_t*) dst; // 320x240
+	uint16_t *next_row, *prev_row;
+	
+	dst_px += 320 * 12;
+	
+	unsigned int x,y,ox=0,oy=0,c,n,skipped=0;
+	for (y=0; y<144; y++) {
+		dst_px += 40;
+		for (x=0; x<160; x++) {
+			c = *src_px;
+			*dst_px = c;
+			dst_px += 1;
+			
+			ox = !ox;
+			if (ox) {
+				n = *(src_px+1); // right
+				if (c>n) *dst_px = n; // always pick the darker
+				else *dst_px = c;
+				dst_px += 1;
+			}
+			src_px += 1;
+		}
+		dst_px += 40;
+		src_px += 96;
+		
+		if (skipped) {
+			// NOTE: we hit the oy condition on the iteration before this
+			// so we've just drawn the line after the one we skipped
+			// so let's jump back to the beginning of the skipped line
+			dst_px -= 320 * 2;
+			dst_px += 40;
+			prev_row += 40;
+			next_row += 40;
+			for (x=0;x<240;x++) {
+				n = *next_row;
+				c = *prev_row;
+				if (c>n) *dst_px = n; // always pick the darker
+				else *dst_px = c;
+				prev_row += 1;
+				dst_px += 1;
+				next_row += 1;
+			}
+			dst_px += 40;
+			dst_px += 320; // skip to the line after the one we had already drawn
+			skipped = 0;
+		}
+		
+		oy = !oy;
+		if (oy) {
+			// NOTE: we hit this before skipped condition
+			// we are going to skip this interpolated line
+			// and revisit it once we've drawn the next line
+			skipped = 1;
+			prev_row = dst_px - 320;
+			dst_px += 320;
+			next_row = dst_px;
+		}
+	}
+}
+
 /*
     Upscale 160x144 -> 320x240
     Horizontal upscale:

@@ -33,12 +33,6 @@ static uint8_t save_slot = 0;
 static uint8_t quit = 0;
 static uint8_t fastforward = 0;
 
-static const int8_t upscalers_available = 2
-#ifdef SCALE2X_UPSCALER
-+1
-#endif
-;
-
 #ifdef NONBLOCKING_AUDIO
 Uint32 real_FPS;
 Uint32 start;
@@ -50,6 +44,17 @@ uint32_t SDL_UXTimerRead(void) {
 #endif
 uint32_t skip_render = 0;
 
+enum {
+	SCALER_NATIVE = 0,
+	SCALER_FULLSCREEN,
+	SCALER_ASPECT,
+	SCALER_15X_SHARP,
+#ifdef SCALE2X_UPSCALER
+	SCALER_EPX_2X,
+#endif	
+	SCALER_COUNT
+};
+	
 static void video_update()
 {
 #ifdef SCALE2X_UPSCALER
@@ -60,24 +65,30 @@ static void video_update()
 		switch(option.fullscreen) 
 		{
 			// Native
-			case 0: 
+			case SCALER_NATIVE: 
 			if(sms.console == CONSOLE_GG) 
 				bitmap_scale(48,0,160,144,160,144,256,HOST_WIDTH_RESOLUTION-160,(uint16_t* restrict)sms_bitmap->pixels,(uint16_t* restrict)sdl_screen->pixels+(HOST_WIDTH_RESOLUTION-160)/2+(HOST_HEIGHT_RESOLUTION-144)/2*HOST_WIDTH_RESOLUTION);
 			else 
 				bitmap_scale(0,0,256,vdp.height,256,(vdp.height),256,HOST_WIDTH_RESOLUTION-256,(uint16_t* restrict)sms_bitmap->pixels,(uint16_t* restrict)sdl_screen->pixels+(HOST_WIDTH_RESOLUTION-256)/2+(HOST_HEIGHT_RESOLUTION-(vdp.height))/2*HOST_WIDTH_RESOLUTION);
 			break;
 			// Fullscreen
-			case 1:
+			case SCALER_FULLSCREEN:
 			if(sms.console == CONSOLE_GG) 
 				upscale_160x144_to_320x240((uint32_t* restrict)sdl_screen->pixels, (uint32_t* restrict)sms_bitmap->pixels+24);
 			else 
 				upscale_SMS_to_320x240((uint32_t* restrict)sdl_screen->pixels, (uint32_t* restrict)sms_bitmap->pixels, vdp.height);
 			break;
-			case 2:
+			case SCALER_ASPECT:
 				bitmap_scale(48,0,160,144,267,240,256,HOST_WIDTH_RESOLUTION-267,(uint16_t* restrict)sms_bitmap->pixels,(uint16_t* restrict)sdl_screen->pixels+(HOST_WIDTH_RESOLUTION-267)/2+(HOST_HEIGHT_RESOLUTION-240)/2*HOST_WIDTH_RESOLUTION);
 			break;
+			case SCALER_15X_SHARP:
+			if(sms.console == CONSOLE_GG) 
+				upscale_160x144_to_240x216((uint32_t*)sdl_screen->pixels, (uint32_t*)sms_bitmap->pixels+24);
+			else // not sure what to do here...
+				bitmap_scale(0,0,256,vdp.height,256,(vdp.height),256,HOST_WIDTH_RESOLUTION-256,(uint16_t* restrict)sms_bitmap->pixels,(uint16_t* restrict)sdl_screen->pixels+(HOST_WIDTH_RESOLUTION-256)/2+(HOST_HEIGHT_RESOLUTION-(vdp.height))/2*HOST_WIDTH_RESOLUTION);
+			break;
 			// Hqx
-			case 3:
+			case SCALER_EPX_2X:
 	#ifdef SCALE2X_UPSCALER
 			if(sms.console == CONSOLE_GG) 
 			{
@@ -683,16 +694,19 @@ static void Menu()
         {
 			switch(option.fullscreen)
 			{
-				case 0:
+				case SCALER_NATIVE:
 					print_string("Scaling : Native", TextRed, 0, 5, 105, backbuffer->pixels);
 				break;
-				case 1:
+				case SCALER_FULLSCREEN:
 					print_string("Scaling : Stretched", TextRed, 0, 5, 105, backbuffer->pixels);
 				break;
-				case 2:
-					print_string("Scaling : 1.5X", TextRed, 0, 5, 105, backbuffer->pixels);
+				case SCALER_ASPECT:
+					print_string("Scaling : Aspect", TextRed, 0, 5, 105, backbuffer->pixels);
 				break;
-				case 3:
+				case SCALER_15X_SHARP:
+					print_string("Scaling : 1.5X Sharp", TextRed, 0, 5, 105, backbuffer->pixels);
+				break;
+				case SCALER_EPX_2X:
 					print_string("Scaling : EPX/Scale2x", TextRed, 0, 5, 105, backbuffer->pixels);
 				break;
 			}
@@ -701,16 +715,19 @@ static void Menu()
         {
 			switch(option.fullscreen)
 			{
-				case 0:
+				case SCALER_NATIVE:
 					print_string("Scaling : Native", TextWhite, 0, 5, 105, backbuffer->pixels);
 				break;
-				case 1:
+				case SCALER_FULLSCREEN:
 					print_string("Scaling : Stretched", TextWhite, 0, 5, 105, backbuffer->pixels);
 				break;
-				case 2:
-					print_string("Scaling : 1.5X", TextWhite, 0, 5, 105, backbuffer->pixels);
+				case SCALER_ASPECT:
+					print_string("Scaling : Aspect", TextWhite, 0, 5, 105, backbuffer->pixels);
 				break;
-				case 3:
+				case SCALER_15X_SHARP:
+					print_string("Scaling : 1.5X Sharp", TextWhite, 0, 5, 105, backbuffer->pixels);
+				break;
+				case SCALER_EPX_2X:
 					print_string("Scaling : EPX/Scale2x", TextWhite, 0, 5, 105, backbuffer->pixels);
 				break;
 			}
@@ -765,12 +782,14 @@ static void Menu()
 							break;
                             case 4:
 							option.fullscreen--;
-							if (option.fullscreen == 2 && sms.console != CONSOLE_GG)
-							{
+							if (option.fullscreen==SCALER_15X_SHARP && sms.console != CONSOLE_GG) {
+								option.fullscreen--;
+							}
+							if (option.fullscreen==SCALER_ASPECT && sms.console != CONSOLE_GG) {
 								option.fullscreen--;
 							}
 							if (option.fullscreen < 0)
-								option.fullscreen = upscalers_available;
+								option.fullscreen += SCALER_COUNT;
 							break;
 							case 5:
 								if (option.soundlevel == 0)
@@ -791,12 +810,14 @@ static void Menu()
 							break;
                             case 4:
                                 option.fullscreen++;
-								if (option.fullscreen == 2 && sms.console != CONSOLE_GG)
-								{
+								if (option.fullscreen==SCALER_ASPECT && sms.console != CONSOLE_GG){
 									option.fullscreen++;
 								}
-                                if (option.fullscreen > upscalers_available)
-                                    option.fullscreen = 0;
+								if (option.fullscreen==SCALER_15X_SHARP && sms.console != CONSOLE_GG){
+									option.fullscreen++;
+								}
+                                if (option.fullscreen >= SCALER_COUNT)
+                                    option.fullscreen -= SCALER_COUNT;
 							break;
 							case 5:
 								option.soundlevel++;
@@ -829,13 +850,15 @@ static void Menu()
 						option.soundlevel = 0;
 				break;
                 case 4 :
-                    option.fullscreen++;
-					if (option.fullscreen == 2 && sms.console != CONSOLE_GG)
-					{
+	                option.fullscreen++;
+					if (option.fullscreen==SCALER_ASPECT && sms.console != CONSOLE_GG){
 						option.fullscreen++;
 					}
-                    if (option.fullscreen > upscalers_available)
-                        option.fullscreen = 0;
+					if (option.fullscreen==SCALER_15X_SHARP && sms.console != CONSOLE_GG){
+						option.fullscreen++;
+					}
+	                if (option.fullscreen >= SCALER_COUNT)
+                        option.fullscreen -= SCALER_COUNT;
                     break;
                 case 2 :
                     smsp_state(save_slot, 1);
@@ -950,7 +973,9 @@ int main (int argc, char *argv[])
 	
 	memset(&option, 0, sizeof(option));
 	
-	option.fullscreen = 1;
+	int defaultFullscreen = SCALER_FULLSCREEN; // blech
+	
+	option.fullscreen = defaultFullscreen;
 	option.fm = 1;
 	option.spritelimit = 1;
 	option.tms_pal = 2;
@@ -964,13 +989,14 @@ int main (int argc, char *argv[])
 	
 	strcpy(option.game_name, argv[1]);
 	
+	
 	// Force Colecovision mode if extension is .col
 	if (strcmp(strrchr(argv[1], '.'), ".col") == 0) option.console = 6;
 	// Sometimes Game Gear games are not properly detected, force them accordingly
 	else if (strcmp(strrchr(argv[1], '.'), ".gg") == 0) option.console = 3;
 	
-	if (option.fullscreen < 0 && option.fullscreen > upscalers_available) option.fullscreen = 1;
-	if (option.console != 3 && option.fullscreen > 1) option.fullscreen = 1;
+	if (option.fullscreen < 0 && option.fullscreen > SCALER_COUNT) option.fullscreen = defaultFullscreen;
+	if (option.console != 3 && option.fullscreen > defaultFullscreen) option.fullscreen = defaultFullscreen;
 	
 	// Load ROM
 	if(!load_rom(argv[1])) 
@@ -1063,7 +1089,7 @@ int main (int argc, char *argv[])
 			timer_count = SDL_UXTimerRead();
 			if (real_FPS > timer_count - start) {
 				sleeptime = real_FPS - (timer_count - start) - 860;	// little margin to prevent audio underrun
-				if (sleeptime > 0) usleep(sleeptime);			// 512:-810, 256:-850 Ç≈underrunî≠ê∂
+				if (sleeptime > 0) usleep(sleeptime);			// 512:-810, 256:-850 „ÅßunderrunÁô∫Áîü
 				skip_render = 0; start = SDL_UXTimerRead();
 			} else {
 				skip_render++;

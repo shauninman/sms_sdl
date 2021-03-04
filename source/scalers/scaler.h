@@ -10,6 +10,8 @@ extern void bitmap_scale(uint32_t startx, uint32_t starty, uint32_t viswidth, ui
 extern void upscale_160x144_to_320x240(uint32_t* restrict dst, uint32_t* restrict src);
 extern void upscale_SMS_to_320x240(uint32_t* restrict dst, uint32_t* restrict src, uint32_t height_scale);
 
+void upscale_160x144_to_240x216(uint32_t *dst, uint32_t *src);
+
 /* Arcade Mini/PAP K3 Plus/PSP-Like scalers */
 extern void upscale_160x144_to_320x272_for_480x272(uint32_t* restrict dst, uint32_t* restrict src);
 extern void upscale_160x144_to_480x272(uint32_t* restrict dst, uint32_t* restrict src);
