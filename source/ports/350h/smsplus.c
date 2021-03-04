@@ -681,7 +681,7 @@ static void Menu()
 					print_string("Scaling : Native", TextRed, 0, 5, 105, backbuffer->pixels);
 				break;
 				case 1:
-					print_string("Scaling : Fullscreen", TextRed, 0, 5, 105, backbuffer->pixels);
+					print_string("Scaling : Stretched", TextRed, 0, 5, 105, backbuffer->pixels);
 				break;
 				case 2:
 					print_string("Scaling : 1.5X", TextRed, 0, 5, 105, backbuffer->pixels);
@@ -699,7 +699,7 @@ static void Menu()
 					print_string("Scaling : Native", TextWhite, 0, 5, 105, backbuffer->pixels);
 				break;
 				case 1:
-					print_string("Scaling : Fullscreen", TextWhite, 0, 5, 105, backbuffer->pixels);
+					print_string("Scaling : Stretched", TextWhite, 0, 5, 105, backbuffer->pixels);
 				break;
 				case 2:
 					print_string("Scaling : 1.5X", TextWhite, 0, 5, 105, backbuffer->pixels);
