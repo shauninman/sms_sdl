@@ -50,7 +50,7 @@ SRCDIR		+= ./source/scale2x
 endif
 
 #LDFLAGS     = -nodefaultlibs -lc -lgcc -lSDL -no-pie -Wl,--as-needed -Wl,--gc-sections -s -flto
-LDFLAGS     = -lc -lgcc -lm -lSDL -Wl,--as-needed -Wl,--gc-sections -s -flto
+LDFLAGS     = -lc -lgcc -lm -lSDL -Wl,--gc-sections -s -flto
 
 ifeq ($(SOUND_OUTPUT), portaudio)
 LDFLAGS		+= -lportaudio
@@ -74,6 +74,8 @@ LDFLAGS		+= -lgcov
 else ifeq ($(PROFILE), APPLY)
 CFLAGS		+= -fprofile-use -fprofile-dir=./profile -fbranch-probabilities
 endif
+
+LDFLAGS += -lSDL_TTF -lSDL_Image -ldl # required for libmmenu
 
 # Rules to make executable
 $(PRGNAME): $(OBJS)  

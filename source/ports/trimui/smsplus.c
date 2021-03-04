@@ -15,6 +15,9 @@
 #include "font_drawing.h"
 #include "sound_output.h"
 
+#include <mmenu.h>
+static void* mmenu = NULL;
+
 static gamedata_t gdata;
 
 t_config option;
@@ -1040,6 +1043,12 @@ int main (int argc, char *argv[])
 	
 	Sound_Init();
 	
+	mmenu = dlopen("libmmenu.so", RTLD_LAZY);
+	
+	char save_path[PATH_MAX];
+	snprintf(save_path, sizeof(save_path), "%s%s.st", gdata.stdir, gdata.gamename);
+	strcpy(save_path+strlen(save_path), "%i");
+	
 #ifdef NONBLOCKING_AUDIO
 //	if (sms.display == DISPLAY_PAL) real_FPS = 1000 / 49.701459;
 //	else real_FPS = 1000 / 59.922743;
@@ -1070,7 +1079,30 @@ int main (int argc, char *argv[])
 		
 		if (selectpressed == 1)
 		{
-			Menu();
+			if (mmenu) {
+				ShowMenu_t ShowMenu = (ShowMenu_t)dlsym(mmenu, "ShowMenu");
+				
+				MenuReturnStatus status = ShowMenu(option.game_name, save_path, sdl_screen, kMenuEventKeyDown);
+			
+				if (status==kStatusExitGame) {
+					quit = 1;
+				}
+				else if (status==kStatusOpenMenu) {
+					Menu();
+				}
+				else if (status>=kStatusLoadSlot) {
+					int slot = status - kStatusLoadSlot;
+                    smsp_state(slot, 1);
+				}
+				else if (status>=kStatusSaveSlot) {
+					int slot = status - kStatusSaveSlot;
+					smsp_state(slot, 0);
+				}
+			}
+			else {
+				Menu();
+			}
+			
 			SDL_FillRect(sdl_screen, NULL, 0);
 			input.system &= (IS_GG) ? ~INPUT_START : ~INPUT_PAUSE;
 			selectpressed = 0;
@@ -1102,6 +1134,14 @@ int main (int argc, char *argv[])
 		// Refresh video data
 		video_update();
 	}
+	
+	// wipe screen on quit
+	SDL_FillRect(sdl_screen, NULL, 0);
+	SDL_Flip(sdl_screen);
+	#ifdef SDL_TRIPLEBUF
+	SDL_FillRect(sdl_screen, NULL, 0);
+	SDL_Flip(sdl_screen);
+	#endif
 	
 	config_save();
 	Cleanup();
