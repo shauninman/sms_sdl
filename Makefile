@@ -3,7 +3,7 @@
 PROFILE = APPLY
 
 PRGNAME     = sms_sdl
-CC			= /opt/trimui/bin/arm-unknown-linux-gnueabi-gcc
+CC			= /opt/trimui-toolchain/bin/arm-buildroot-linux-gnueabi-gcc
 
 # Possible choices : rs97, k3s (PAP K3S), sdl, amini, fbdev
 PORT = trimui
@@ -75,7 +75,7 @@ else ifeq ($(PROFILE), APPLY)
 CFLAGS		+= -fprofile-use -fprofile-dir=./profile -fbranch-probabilities
 endif
 
-LDFLAGS += -lSDL_TTF -lSDL_Image -ldl # required for libmmenu
+LDFLAGS += -lSDL_ttf -lSDL_image -ldl # required for libmmenu
 
 # Rules to make executable
 $(PRGNAME): $(OBJS)  

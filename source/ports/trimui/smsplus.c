@@ -15,6 +15,7 @@
 #include "font_drawing.h"
 #include "sound_output.h"
 
+#include <dlfcn.h>
 #include <mmenu.h>
 static void* mmenu = NULL;
 
