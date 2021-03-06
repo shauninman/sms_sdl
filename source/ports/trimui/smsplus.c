@@ -969,7 +969,7 @@ int main (int argc, char *argv[])
 	
 	if (argc < 2) 
 	{
-		fprintf(stderr, "Usage: ./smsplus [FILE]\n");
+		fprintf(stderr, "Usage: ./smsplus [FILE] [gg]\n");
 		return 0;
 	}
 	
@@ -977,7 +977,7 @@ int main (int argc, char *argv[])
 	
 	memset(&option, 0, sizeof(option));
 	
-	int defaultFullscreen = SCALER_FULLSCREEN; // blech
+	int defaultFullscreen = argc==2 ? SCALER_NATIVE : SCALER_15X_SHARP;
 	
 	option.fullscreen = defaultFullscreen;
 	option.fm = 1;
