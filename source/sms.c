@@ -479,17 +479,23 @@ void mapper_8k_w(uint16_t address, uint8_t data)
     
 void mapper_16k_w(uint16_t address, uint8_t data)
 {
+	extern uint8_t gaiden_hack;
 	int32_t i;
 
 	/* cartridge ROM page (16k) index */
 	uint16_t page = data % slot.pages;
   
 	/* page index increment (SEGA mapper) */
-	if (slot.fcr[0] & 0x03)
+	
+	/* THIS SHOULD BE FIXED PROPERLY */
+	/* TODO : For whatever reason, disabling this makes Shining Force Gaiden English trad work properly. 
+	 * This same bug happens on Mednafen and the older SMS Plus GX too. (up until they introduced the code just below)
+	 * */
+	if (slot.fcr[0] & 0x03 && gaiden_hack != 1)
 	{
 		page = (page + ((4 - (slot.fcr[0] & 0x03)) << 3)) % slot.pages;
 	}
-
+	
 	/* save frame control register data */
 	slot.fcr[address] = data;
 
