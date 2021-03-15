@@ -969,7 +969,7 @@ int main (int argc, char *argv[])
 	
 	if (argc < 2) 
 	{
-		fprintf(stderr, "Usage: ./smsplus [FILE] [gg]\n");
+		fprintf(stderr, "Usage: ./smsplus [FILE]\n");
 		return 0;
 	}
 	
@@ -977,7 +977,7 @@ int main (int argc, char *argv[])
 	
 	memset(&option, 0, sizeof(option));
 	
-	int defaultFullscreen = argc==2 ? SCALER_NATIVE : SCALER_15X_SHARP;
+	int defaultFullscreen = (strcmp(strrchr(argv[1], '.'), ".gg") == 0) ? SCALER_15X_SHARP : SCALER_NATIVE;
 	
 	option.fullscreen = defaultFullscreen;
 	option.fm = 1;
@@ -992,7 +992,6 @@ int main (int argc, char *argv[])
 	option.console = 0;
 	
 	strcpy(option.game_name, argv[1]);
-	
 	
 	// Force Colecovision mode if extension is .col
 	if (strcmp(strrchr(argv[1], '.'), ".col") == 0) option.console = 6;
