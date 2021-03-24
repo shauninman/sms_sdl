@@ -157,8 +157,10 @@ void Sound_Close(void)
 
 void Sound_Pause()
 {
+	Sound_Close();
 }
 
 void Sound_Unpause()
 {
+	Sound_Init();
 }
