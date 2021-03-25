@@ -998,8 +998,8 @@ int main (int argc, char *argv[])
 	// Sometimes Game Gear games are not properly detected, force them accordingly
 	else if (strcmp(strrchr(argv[1], '.'), ".gg") == 0) option.console = 3;
 	
-	if (option.fullscreen < 0 && option.fullscreen > SCALER_COUNT) option.fullscreen = defaultFullscreen;
-	if (option.console != 3 && option.fullscreen > defaultFullscreen) option.fullscreen = defaultFullscreen;
+	if (option.fullscreen < 0 || option.fullscreen > SCALER_COUNT) option.fullscreen = defaultFullscreen;
+	if (option.console != 3 && option.fullscreen > SCALER_FULLSCREEN) option.fullscreen = SCALER_FULLSCREEN;
 	
 	// Load ROM
 	if(!load_rom(argv[1])) 
