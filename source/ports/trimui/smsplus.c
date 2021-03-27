@@ -1151,7 +1151,7 @@ int main (int argc, char *argv[])
 		}
 		
 		// Refresh video data
-		if (skip_render == 0) video_update(); // TODO: shouldn't this be !=0?
+		if (skip_render == 0) video_update();
 	}
 	
 	// wipe screen on quit
