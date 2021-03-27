@@ -9,6 +9,8 @@ extern void bitmap_scale(uint32_t startx, uint32_t starty, uint32_t viswidth, ui
 /* OpenDingux-like devices (320x240) */
 extern void upscale_160x144_to_320x240(uint32_t* restrict dst, uint32_t* restrict src);
 extern void upscale_SMS_to_320x240(uint32_t* restrict dst, uint32_t* restrict src, uint32_t height_scale);
+extern void upscale_160x144_to_320x240_main(uint32_t* restrict dst, uint32_t* restrict src, uint32_t midh);
+extern void upscale_SMS_to_320x240_main(uint32_t* restrict dst, uint32_t* restrict src, uint32_t height_scale, uint32_t midh);
 
 void upscale_160x144_to_240x216(uint32_t *dst, uint32_t *src);
 

@@ -3,7 +3,8 @@
 
 typedef struct {
 	int32_t fullscreen;
-	int32_t fullspeed;
+	int32_t fullscreen_gg;	//
+//	int32_t fullspeed;	//TRIMUI: this is not used on all platforms
 	int32_t nosound;
 	int32_t joystick;
 	/* Don't use below (sndrate), deprecated */

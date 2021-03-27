@@ -330,7 +330,10 @@ void upscale_160x144_to_240x216(uint32_t *dst, uint32_t *src) {
 */
 void upscale_160x144_to_320x240(uint32_t* restrict dst, uint32_t* restrict src)
 {
-    uint32_t midh = 240 / 2;
+	upscale_160x144_to_320x240_main(dst, src, 240 / 2);
+}
+void upscale_160x144_to_320x240_main(uint32_t* restrict dst, uint32_t* restrict src, uint32_t midh)
+{
     uint32_t Eh = 0;
     uint32_t source;
     uint32_t dh = 0;
@@ -397,7 +400,10 @@ void upscale_160x144_to_320x240(uint32_t* restrict dst, uint32_t* restrict src)
 
 void upscale_SMS_to_320x240(uint32_t* restrict dst, uint32_t* restrict src, uint32_t height_scale)
 {
-    uint32_t midh = 240 / 2;
+	upscale_SMS_to_320x240_main(dst, src, height_scale, 240/2);
+}
+void upscale_SMS_to_320x240_main(uint32_t* restrict dst, uint32_t* restrict src, uint32_t height_scale, uint32_t midh)
+{
     uint32_t Eh = 0;
     uint32_t source;
     uint32_t dh = 0;

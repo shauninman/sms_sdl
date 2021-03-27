@@ -46,11 +46,14 @@ uint32_t SDL_UXTimerRead(void) {
 	return (((tval.tv_sec*1000000) + (tval.tv_usec )));
 }
 #endif
-uint32_t skip_render = 0;
+
+static	int32_t		scaler = 0;
+static	uint32_t	skip_render = 0;
 
 enum {
 	SCALER_NATIVE = 0,
-	SCALER_FULLSCREEN,
+	SCALER_FULLSCREEN_SHARP,
+	SCALER_FULLSCREEN_SMOOTH,
 	SCALER_ASPECT,
 	SCALER_15X_SHARP,
 #ifdef SCALE2X_UPSCALER
@@ -66,7 +69,7 @@ static void video_update()
 #endif
 	if (SDL_LockSurface(sdl_screen) == 0)
 	{
-		switch(option.fullscreen) 
+		switch(scaler) 
 		{
 			// Native
 			case SCALER_NATIVE: 
@@ -76,20 +79,23 @@ static void video_update()
 				bitmap_scale(0,0,256,vdp.height,256,(vdp.height),256,HOST_WIDTH_RESOLUTION-256,(uint16_t* restrict)sms_bitmap->pixels,(uint16_t* restrict)sdl_screen->pixels+(HOST_WIDTH_RESOLUTION-256)/2+(HOST_HEIGHT_RESOLUTION-(vdp.height))/2*HOST_WIDTH_RESOLUTION);
 			break;
 			// Fullscreen
-			case SCALER_FULLSCREEN:
+			case SCALER_FULLSCREEN_SHARP:
 			if(sms.console == CONSOLE_GG) 
-				upscale_160x144_to_320x240((uint32_t* restrict)sdl_screen->pixels, (uint32_t* restrict)sms_bitmap->pixels+24);
+				upscale_160x144_to_320x240_main((uint32_t* restrict)sdl_screen->pixels, (uint32_t* restrict)sms_bitmap->pixels+24, 144);
 			else 
-				upscale_SMS_to_320x240((uint32_t* restrict)sdl_screen->pixels, (uint32_t* restrict)sms_bitmap->pixels, vdp.height);
+				upscale_SMS_to_320x240_main((uint32_t* restrict)sdl_screen->pixels, (uint32_t* restrict)sms_bitmap->pixels, vdp.height, vdp.height);
 			break;
-			case SCALER_ASPECT:
+			case SCALER_FULLSCREEN_SMOOTH:
+			if(sms.console == CONSOLE_GG) 
+				upscale_160x144_to_320x240_main((uint32_t* restrict)sdl_screen->pixels, (uint32_t* restrict)sms_bitmap->pixels+24, 240/2);
+			else 
+				upscale_SMS_to_320x240_main((uint32_t* restrict)sdl_screen->pixels, (uint32_t* restrict)sms_bitmap->pixels, vdp.height, 240/2);
+			break;
+			case SCALER_ASPECT:	// for GG only
 				bitmap_scale(48,0,160,144,267,240,256,HOST_WIDTH_RESOLUTION-267,(uint16_t* restrict)sms_bitmap->pixels,(uint16_t* restrict)sdl_screen->pixels+(HOST_WIDTH_RESOLUTION-267)/2+(HOST_HEIGHT_RESOLUTION-240)/2*HOST_WIDTH_RESOLUTION);
 			break;
-			case SCALER_15X_SHARP:
-			if(sms.console == CONSOLE_GG) 
+			case SCALER_15X_SHARP:	// for GG only
 				upscale_160x144_to_240x216((uint32_t*)sdl_screen->pixels, (uint32_t*)sms_bitmap->pixels+24);
-			else // not sure what to do here...
-				bitmap_scale(0,0,256,vdp.height,256,(vdp.height),256,HOST_WIDTH_RESOLUTION-256,(uint16_t* restrict)sms_bitmap->pixels,(uint16_t* restrict)sdl_screen->pixels+(HOST_WIDTH_RESOLUTION-256)/2+(HOST_HEIGHT_RESOLUTION-(vdp.height))/2*HOST_WIDTH_RESOLUTION);
 			break;
 			// Hqx
 			case SCALER_EPX_2X:
@@ -696,13 +702,16 @@ static void Menu()
 
         if (currentselection == 4)
         {
-			switch(option.fullscreen)
+			switch(scaler)
 			{
 				case SCALER_NATIVE:
 					print_string("Scaling : Native", TextRed, 0, 5, 105, backbuffer->pixels);
 				break;
-				case SCALER_FULLSCREEN:
-					print_string("Scaling : Fullscreen", TextRed, 0, 5, 105, backbuffer->pixels);
+				case SCALER_FULLSCREEN_SHARP:
+					print_string("Scaling : FS Sharp", TextRed, 0, 5, 105, backbuffer->pixels);
+				break;
+				case SCALER_FULLSCREEN_SMOOTH:
+					print_string("Scaling : FS Smooth", TextRed, 0, 5, 105, backbuffer->pixels);
 				break;
 				case SCALER_ASPECT:
 					print_string("Scaling : Aspect", TextRed, 0, 5, 105, backbuffer->pixels);
@@ -717,13 +726,16 @@ static void Menu()
         }
         else
         {
-			switch(option.fullscreen)
+			switch(scaler)
 			{
 				case SCALER_NATIVE:
 					print_string("Scaling : Native", TextWhite, 0, 5, 105, backbuffer->pixels);
 				break;
-				case SCALER_FULLSCREEN:
-					print_string("Scaling : Fullscreen", TextWhite, 0, 5, 105, backbuffer->pixels);
+				case SCALER_FULLSCREEN_SHARP:
+					print_string("Scaling : FS Sharp", TextWhite, 0, 5, 105, backbuffer->pixels);
+				break;
+				case SCALER_FULLSCREEN_SMOOTH:
+					print_string("Scaling : FS Smooth", TextWhite, 0, 5, 105, backbuffer->pixels);
 				break;
 				case SCALER_ASPECT:
 					print_string("Scaling : Aspect", TextWhite, 0, 5, 105, backbuffer->pixels);
@@ -785,15 +797,15 @@ static void Menu()
                                 if (save_slot > 0) save_slot--;
 							break;
                             case 4:
-							option.fullscreen--;
-							if (option.fullscreen==SCALER_15X_SHARP && sms.console != CONSOLE_GG) {
-								option.fullscreen--;
+							scaler--;
+							if (scaler==SCALER_15X_SHARP && sms.console != CONSOLE_GG) {
+								scaler--;
 							}
-							if (option.fullscreen==SCALER_ASPECT && sms.console != CONSOLE_GG) {
-								option.fullscreen--;
+							if (scaler==SCALER_ASPECT && sms.console != CONSOLE_GG) {
+								scaler--;
 							}
-							if (option.fullscreen < 0)
-								option.fullscreen += SCALER_COUNT;
+							if (scaler < 0)
+								scaler += SCALER_COUNT;
 							break;
 							case 5:
 								if (option.soundlevel == 0)
@@ -813,15 +825,15 @@ static void Menu()
 									save_slot = 9;
 							break;
                             case 4:
-                                option.fullscreen++;
-								if (option.fullscreen==SCALER_ASPECT && sms.console != CONSOLE_GG){
-									option.fullscreen++;
+                                scaler++;
+								if (scaler==SCALER_ASPECT && sms.console != CONSOLE_GG){
+									scaler++;
 								}
-								if (option.fullscreen==SCALER_15X_SHARP && sms.console != CONSOLE_GG){
-									option.fullscreen++;
+								if (scaler==SCALER_15X_SHARP && sms.console != CONSOLE_GG){
+									scaler++;
 								}
-                                if (option.fullscreen >= SCALER_COUNT)
-                                    option.fullscreen -= SCALER_COUNT;
+                                if (scaler >= SCALER_COUNT)
+                                    scaler -= SCALER_COUNT;
 							break;
 							case 5:
 								option.soundlevel++;
@@ -854,15 +866,15 @@ static void Menu()
 						option.soundlevel = 0;
 				break;
                 case 4 :
-	                option.fullscreen++;
-					if (option.fullscreen==SCALER_ASPECT && sms.console != CONSOLE_GG){
-						option.fullscreen++;
+	                scaler++;
+					if (scaler==SCALER_ASPECT && sms.console != CONSOLE_GG){
+						scaler++;
 					}
-					if (option.fullscreen==SCALER_15X_SHARP && sms.console != CONSOLE_GG){
-						option.fullscreen++;
+					if (scaler==SCALER_15X_SHARP && sms.console != CONSOLE_GG){
+						scaler++;
 					}
-	                if (option.fullscreen >= SCALER_COUNT)
-                        option.fullscreen -= SCALER_COUNT;
+	                if (scaler >= SCALER_COUNT)
+                        scaler -= SCALER_COUNT;
                     break;
                 case 2 :
                     smsp_state(save_slot, 1);
@@ -977,29 +989,24 @@ int main (int argc, char *argv[])
 	
 	memset(&option, 0, sizeof(option));
 	
-	int defaultFullscreen = (strcmp(strrchr(argv[1], '.'), ".gg") == 0) ? SCALER_15X_SHARP : SCALER_NATIVE;
-	
-	option.fullscreen = defaultFullscreen;
+#define scaler_default	SCALER_NATIVE
+#define scaler_default_gg	SCALER_15X_SHARP
+	option.fullscreen = scaler_default;
+	option.fullscreen_gg = scaler_default_gg;
 	option.fm = 1;
 	option.spritelimit = 1;
 	option.tms_pal = 2;
-	option.console = 0;
 	option.nosound = 0;
 	option.soundlevel = 2;
 	
 	config_load();
-
+	
 	option.console = 0;
-	
 	strcpy(option.game_name, argv[1]);
-	
 	// Force Colecovision mode if extension is .col
 	if (strcmp(strrchr(argv[1], '.'), ".col") == 0) option.console = 6;
 	// Sometimes Game Gear games are not properly detected, force them accordingly
-	else if (strcmp(strrchr(argv[1], '.'), ".gg") == 0) option.console = 3;
-	
-	if (option.fullscreen < 0 || option.fullscreen > SCALER_COUNT) option.fullscreen = defaultFullscreen;
-	if (option.console != 3 && option.fullscreen > SCALER_FULLSCREEN) option.fullscreen = SCALER_FULLSCREEN;
+	else if (strcmp(strrchr(argv[1], '.'), ".gg") == 0) { option.console = 3;  }
 	
 	// Load ROM
 	if(!load_rom(argv[1])) 
@@ -1008,7 +1015,19 @@ int main (int argc, char *argv[])
 		Cleanup();
 		return 0;
 	}
+
+	if (sms.console != CONSOLE_GG) {
+		scaler = option.fullscreen;
+		if (scaler < 0 || scaler == SCALER_ASPECT || scaler == SCALER_15X_SHARP || scaler >= SCALER_COUNT)
+			scaler = scaler_default;
+	}
+	else {
+		scaler = option.fullscreen_gg;
+		if (scaler < 0 || scaler >= SCALER_COUNT)
+			scaler = scaler_default_gg;
+	}
 	
+
 	SDL_Init(SDL_INIT_VIDEO);
 	sdl_screen = SDL_SetVideoMode(HOST_WIDTH_RESOLUTION, HOST_HEIGHT_RESOLUTION, 16, SDL_HWSURFACE);
 	sms_bitmap = SDL_CreateRGBSurface(SDL_SWSURFACE, VIDEO_WIDTH_SMS, 267, 16, 0, 0, 0, 0);
@@ -1132,7 +1151,7 @@ int main (int argc, char *argv[])
 		}
 		
 		// Refresh video data
-		video_update();
+		if (skip_render == 0) video_update(); // TODO: shouldn't this be !=0?
 	}
 	
 	// wipe screen on quit
@@ -1143,6 +1162,13 @@ int main (int argc, char *argv[])
 	SDL_Flip(sdl_screen);
 	#endif
 	
+	if (sms.console != CONSOLE_GG) {
+		option.fullscreen = scaler;
+	}
+	else {
+		option.fullscreen_gg = scaler;
+	}
+
 	config_save();
 	Cleanup();
 	
