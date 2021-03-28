@@ -65,7 +65,7 @@ ifeq ($(SOUND_OUTPUT), pulse)
 LDFLAGS		+= -lpulse -lpulse-simple
 endif
 ifeq ($(SOUND_OUTPUT), sdl12)
-CFLAGS		+= -DNONBLOCKING_AUDIO
+CFLAGS		+= -DSDLSOUND
 endif
 
 ifeq ($(PROFILE), YES)

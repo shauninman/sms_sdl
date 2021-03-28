@@ -56,8 +56,13 @@ typedef struct {
 
 void smsp_state(uint8_t slot_number, uint8_t mode);
 
-//#define SOUND_FREQUENCY 44100
-#define SOUND_FREQUENCY 30720		// 512 * 60 for SDLsound
-//#define SOUND_FREQUENCY 15360		// 256 * 60 for SDLsound
+#define SOUND_FREQUENCY		44100
+
+#ifdef	SDLSOUND
+#define SOUND_SAMPLES_SIZE	512
+#define UNDERRUN_THRESHOLD	0.5
+#define BUFFSIZE_MULT		8
+#define MAX_SKIP_COUNT		4
+#endif
 
 #endif
