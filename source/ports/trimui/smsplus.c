@@ -665,7 +665,7 @@ static void Menu()
     
 	Sound_Pause();
     
-    while ( ((currentselection != 1) && (currentselection != 8) && (currentselection != 9)) || (!pressed) )
+    while ( ((currentselection != 1) && (currentselection != 9) && (currentselection != 10)) || (!pressed) )
     {
         pressed = 0;
  		SDL_FillRect( backbuffer, NULL, 0 );
@@ -676,21 +676,20 @@ static void Menu()
 
 		print_string("SMS PLUS GX", TextWhite, 0, 105, 15, backbuffer->pixels);
 
-#define		MENU_ST		40
-#define		MENU_ADD	16
+#define		MENU_Y(y)	20 + (15*y)
 
-		if (currentselection == 1) print_string("Continue", TextRed, 0, 5, MENU_ST, backbuffer->pixels);
-		else  print_string("Continue", TextWhite, 0, 5, MENU_ST, backbuffer->pixels);
+		if (currentselection == 1) print_string("Continue", TextRed, 0, 5, MENU_Y(1), backbuffer->pixels);
+		else  print_string("Continue", TextWhite, 0, 5, MENU_Y(1), backbuffer->pixels);
 		
 		snprintf(text, sizeof(text), "Load State %d", save_slot);
 		
-		if (currentselection == 2) print_string(text, TextRed, 0, 5, MENU_ST+MENU_ADD*1, backbuffer->pixels);
-		else print_string(text, TextWhite, 0, 5, MENU_ST+MENU_ADD*1, backbuffer->pixels);
+		if (currentselection == 2) print_string(text, TextRed, 0, 5, MENU_Y(2), backbuffer->pixels);
+		else print_string(text, TextWhite, 0, 5, MENU_Y(2), backbuffer->pixels);
 		
 		snprintf(text, sizeof(text), "Save State %d", save_slot);
 		
-		if (currentselection == 3) print_string(text, TextRed, 0, 5, MENU_ST+MENU_ADD*2, backbuffer->pixels);
-		else print_string(text, TextWhite, 0, 5, MENU_ST+MENU_ADD*2, backbuffer->pixels);
+		if (currentselection == 3) print_string(text, TextRed, 0, 5, MENU_Y(3), backbuffer->pixels);
+		else print_string(text, TextWhite, 0, 5, MENU_Y(3), backbuffer->pixels);
 		
 
         if (currentselection == 4)
@@ -698,22 +697,22 @@ static void Menu()
 			switch(scaler)
 			{
 				case SCALER_NATIVE:
-					print_string("Scaling : Native", TextRed, 0, 5, MENU_ST+MENU_ADD*3, backbuffer->pixels);
+					print_string("Scaling : Native", TextRed, 0, 5, MENU_Y(4), backbuffer->pixels);
 				break;
 				case SCALER_FULLSCREEN_SHARP:
-					print_string("Scaling : FS Sharp", TextRed, 0, 5, MENU_ST+MENU_ADD*3, backbuffer->pixels);
+					print_string("Scaling : FS Sharp", TextRed, 0, 5, MENU_Y(4), backbuffer->pixels);
 				break;
 				case SCALER_FULLSCREEN_SMOOTH:
-					print_string("Scaling : FS Smooth", TextRed, 0, 5, MENU_ST+MENU_ADD*3, backbuffer->pixels);
+					print_string("Scaling : FS Smooth", TextRed, 0, 5, MENU_Y(4), backbuffer->pixels);
 				break;
 				case SCALER_ASPECT:
-					print_string("Scaling : Aspect", TextRed, 0, 5, MENU_ST+MENU_ADD*3, backbuffer->pixels);
+					print_string("Scaling : Aspect", TextRed, 0, 5, MENU_Y(4), backbuffer->pixels);
 				break;
 				case SCALER_15X_SHARP:
-					print_string("Scaling : 1.5X Sharp", TextRed, 0, 5, MENU_ST+MENU_ADD*3, backbuffer->pixels);
+					print_string("Scaling : 1.5X Sharp", TextRed, 0, 5, MENU_Y(4), backbuffer->pixels);
 				break;
 				case SCALER_EPX_2X:
-					print_string("Scaling : EPX/Scale2x", TextRed, 0, 5, MENU_ST+MENU_ADD*3, backbuffer->pixels);
+					print_string("Scaling : EPX/Scale2x", TextRed, 0, 5, MENU_Y(4), backbuffer->pixels);
 				break;
 			}
         }
@@ -722,44 +721,51 @@ static void Menu()
 			switch(scaler)
 			{
 				case SCALER_NATIVE:
-					print_string("Scaling : Native", TextWhite, 0, 5, MENU_ST+MENU_ADD*3, backbuffer->pixels);
+					print_string("Scaling : Native", TextWhite, 0, 5, MENU_Y(4), backbuffer->pixels);
 				break;
 				case SCALER_FULLSCREEN_SHARP:
-					print_string("Scaling : FS Sharp", TextWhite, 0, 5, MENU_ST+MENU_ADD*3, backbuffer->pixels);
+					print_string("Scaling : FS Sharp", TextWhite, 0, 5, MENU_Y(4), backbuffer->pixels);
 				break;
 				case SCALER_FULLSCREEN_SMOOTH:
-					print_string("Scaling : FS Smooth", TextWhite, 0, 5, MENU_ST+MENU_ADD*3, backbuffer->pixels);
+					print_string("Scaling : FS Smooth", TextWhite, 0, 5, MENU_Y(4), backbuffer->pixels);
 				break;
 				case SCALER_ASPECT:
-					print_string("Scaling : Aspect", TextWhite, 0, 5, MENU_ST+MENU_ADD*3, backbuffer->pixels);
+					print_string("Scaling : Aspect", TextWhite, 0, 5, MENU_Y(4), backbuffer->pixels);
 				break;
 				case SCALER_15X_SHARP:
-					print_string("Scaling : 1.5X Sharp", TextWhite, 0, 5, MENU_ST+MENU_ADD*3, backbuffer->pixels);
+					print_string("Scaling : 1.5X Sharp", TextWhite, 0, 5, MENU_Y(4), backbuffer->pixels);
 				break;
 				case SCALER_EPX_2X:
-					print_string("Scaling : EPX/Scale2x", TextWhite, 0, 5, MENU_ST+MENU_ADD*3, backbuffer->pixels);
+					print_string("Scaling : EPX/Scale2x", TextWhite, 0, 5, MENU_Y(4), backbuffer->pixels);
 				break;
 			}
         }
 
 		snprintf(text, sizeof(text), "Sound Volume : %s", Return_Volume(option.soundlevel));
 		
-		if (currentselection == 5) print_string(text, TextRed, 0, 5, MENU_ST+MENU_ADD*4, backbuffer->pixels);
-		else print_string(text, TextWhite, 0, 5, MENU_ST+MENU_ADD*4, backbuffer->pixels);
+		if (currentselection == 5) print_string(text, TextRed, 0, 5, MENU_Y(5), backbuffer->pixels);
+		else print_string(text, TextWhite, 0, 5, MENU_Y(5), backbuffer->pixels);
 		
 		if (option.fm)	snprintf(text, sizeof(text), "FM Sound : ON");
 		else		snprintf(text, sizeof(text), "FM Sound : OFF");
-		if (currentselection == 6) print_string(text, TextRed, 0, 5, MENU_ST+MENU_ADD*5, backbuffer->pixels);
-		else print_string(text, TextWhite, 0, 5, MENU_ST+MENU_ADD*5, backbuffer->pixels);
+		if (currentselection == 6) print_string(text, TextRed, 0, 5, MENU_Y(6), backbuffer->pixels);
+		else print_string(text, TextWhite, 0, 5, MENU_Y(6), backbuffer->pixels);
 		
-		if (currentselection == 7) print_string("Input Remapping", TextRed, 0, 5, MENU_ST+MENU_ADD*6, backbuffer->pixels);
-		else print_string("Input Remapping", TextWhite, 0, 5, MENU_ST+MENU_ADD*6, backbuffer->pixels);
+		if (currentselection == 7) print_string("Input Remapping", TextRed, 0, 5, MENU_Y(7), backbuffer->pixels);
+		else print_string("Input Remapping", TextWhite, 0, 5, MENU_Y(7), backbuffer->pixels);
 		
-		if (currentselection == 8) print_string("Reset", TextRed, 0, 5, MENU_ST+MENU_ADD*7, backbuffer->pixels);
-		else print_string("Reset", TextWhite, 0, 5, MENU_ST+MENU_ADD*7, backbuffer->pixels);
-		;
-		if (currentselection == 9) print_string("Quit", TextRed, 0, 5, MENU_ST+MENU_ADD*8, backbuffer->pixels);
-		else print_string("Quit", TextWhite, 0, 5, MENU_ST+MENU_ADD*8, backbuffer->pixels);
+		switch (option.country)	{	case 0: snprintf(text, sizeof(text), "Country : Auto"); break;
+						case 1: snprintf(text, sizeof(text), "Country : USA"); break;
+						case 2: snprintf(text, sizeof(text), "Country : Europe"); break;
+						case 3: snprintf(text, sizeof(text), "Country : Japan"); break;	}
+		if (currentselection == 8) print_string(text, TextRed, 0, 5, MENU_Y(8), backbuffer->pixels);
+		else print_string(text, TextWhite, 0, 5, MENU_Y(8), backbuffer->pixels);
+
+		if (currentselection == 9) print_string("Reset", TextRed, 0, 5, MENU_Y(9), backbuffer->pixels);
+		else print_string("Reset", TextWhite, 0, 5, MENU_Y(9), backbuffer->pixels);
+		
+		if (currentselection == 10) print_string("Quit", TextRed, 0, 5, MENU_Y(10), backbuffer->pixels);
+		else print_string("Quit", TextWhite, 0, 5, MENU_Y(10), backbuffer->pixels);
 
 		print_string("Build " __DATE__ ", " __TIME__, TextWhite, 0, 5, 195, backbuffer->pixels);
 		print_string("Fork of SMS Plus GX by gameblabla", TextWhite, 0, 5, 210, backbuffer->pixels);
@@ -774,11 +780,11 @@ static void Menu()
                     case SDLK_UP:
                         currentselection--;
                         if (currentselection == 0)
-                            currentselection = 9;
+                            currentselection = 10;
                         break;
                     case SDLK_DOWN:
                         currentselection++;
-                        if (currentselection == 10)
+                        if (currentselection == 11)
                             currentselection = 1;
                         break;
                     case SDLK_LCTRL:	// B
@@ -817,6 +823,12 @@ static void Menu()
 			    			case 6:
 			    				option.fm ^= 1;
 							break;
+			   				case 8:
+			   					if (option.country == 0)
+			   						option.country = 3;
+								else
+									option.country--;
+							break;
                         }
                         break;
                     case SDLK_RIGHT:
@@ -847,6 +859,12 @@ static void Menu()
 			    			case 6:
 			    				option.fm ^= 1;
 							break;
+							case 8:
+								if (option.country == 3)
+									option.country = 0;
+								else
+									option.country++;
+							break;
                         }
                         break;
 					default:
@@ -855,7 +873,7 @@ static void Menu()
             }
             else if (Event.type == SDL_QUIT)
             {
-				currentselection = 9;
+				currentselection = 10;
 				pressed = 1;
 			}
         }
@@ -864,6 +882,12 @@ static void Menu()
         {
             switch(currentselection)
             {
+				case 8:
+					if (option.country == 3)
+						option.country = 0;
+					else
+						option.country++;
+				break;
 				case 7:
 					Input_Remapping();
 				break;
@@ -912,7 +936,7 @@ static void Menu()
     
     if (miniscreen) SDL_FreeSurface(miniscreen);
     
-    if (currentselection == 8) {
+    if (currentselection == 9) {
     	system_poweroff();
     	sms.use_fm = option.fm;
     	system_poweron();
@@ -920,7 +944,7 @@ static void Menu()
     
     Sound_Unpause();
     
-    if (currentselection == 9) quit = 1;
+    if (currentselection == 10) quit = 1;
 	
 	
 }

@@ -280,7 +280,7 @@ static rominfo_t game_list[GAME_DATABASE_CNT] =
 	"Shining Force Final Conflict"}
 };
 
-static void set_config()
+void set_config()
 {
 	uint32_t i;
 

@@ -27,6 +27,7 @@
 
 /* Function prototypes */
 uint32_t load_rom(char *filename);
+void set_config();
 void free_rom(void);
 
 #ifndef NGC
