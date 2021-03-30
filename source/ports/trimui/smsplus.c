@@ -789,11 +789,10 @@ static void Menu()
                         break;
                     case SDLK_LCTRL:	// B
                     case SDLK_ESCAPE:	// Menu
-			pressed = 1;
-			currentselection = 1;
-			break;
+						pressed = 1;
+						currentselection = 1;
+					break;
                     case SDLK_SPACE:	// A
-                    case SDLK_RETURN:	// Start
                         pressed = 1;
                         break;
                     case SDLK_LEFT:
@@ -882,35 +881,10 @@ static void Menu()
         {
             switch(currentselection)
             {
-				case 8:
-					if (option.country == 3)
-						option.country = 0;
-					else
-						option.country++;
-				break;
 				case 7:
 					Input_Remapping();
 				break;
-			    case 6:
-					option.fm ^= 1;
-				break;
-				case 5:
-					option.soundlevel++;
-					if (option.soundlevel > 4)
-						option.soundlevel = 0;
-				break;
-                case 4 :
-	                scaler++;
-					if (scaler==SCALER_ASPECT && sms.console != CONSOLE_GG){
-						scaler++;
-					}
-					if (scaler==SCALER_15X_SHARP && sms.console != CONSOLE_GG){
-						scaler++;
-					}
-	                if (scaler >= SCALER_COUNT)
-                        scaler -= SCALER_COUNT;
-                    break;
-                case 2 :
+			    case 2 :
                     smsp_state(save_slot, 1);
 					currentselection = 1;
                     break;
