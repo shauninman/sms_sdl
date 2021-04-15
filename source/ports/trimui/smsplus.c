@@ -18,6 +18,7 @@
 #include <dlfcn.h>
 #include <mmenu.h>
 static void* mmenu = NULL;
+static int resume_slot = -1;
 
 static gamedata_t gdata;
 
@@ -1082,6 +1083,12 @@ int main (int argc, char *argv[])
 	char save_path[PATH_MAX];
 	snprintf(save_path, sizeof(save_path), "%s%s.st", gdata.stdir, gdata.gamename);
 	strcpy(save_path+strlen(save_path), "%i");
+	
+	if (mmenu) {
+		ResumeSlot_t ResumeSlot = (ResumeSlot_t)dlsym(mmenu, "ResumeSlot");
+		if (ResumeSlot) resume_slot = ResumeSlot();
+		if (resume_slot!=-1) smsp_state(resume_slot, 1);
+	}
 	
 	// Loop until the user closes the window
 	while (!quit) 
