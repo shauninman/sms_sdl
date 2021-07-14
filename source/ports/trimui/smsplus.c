@@ -141,6 +141,7 @@ void smsp_state(uint8_t slot_number, uint8_t mode)
 			}
 			break;
 	}
+	sync();
 }
 
 void system_manage_sram(uint8_t *sram, uint8_t slot_number, uint8_t mode) 
